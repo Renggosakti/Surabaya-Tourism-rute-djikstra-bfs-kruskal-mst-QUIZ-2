@@ -7,338 +7,64 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<style>
-:root{
-  --bg:#f5f7fa;--white:#fff;--surf:#fafbfc;
-  --border:#e2e8f0;--border2:#cbd5e1;
-  --text:#0f172a;--text2:#475569;--text3:#94a3b8;
-  --blue:#2563eb;--blue-l:#eff6ff;--blue-d:#1d4ed8;--blue-xl:#dbeafe;
-  --green:#059669;--green-l:#f0fdf4;--green-xl:#d1fae5;
-  --red:#dc2626;--red-l:#fef2f2;
-  --amber:#d97706;--amber-l:#fffbeb;--amber-xl:#fde68a;
-  --purple:#7c3aed;--purple-l:#f5f3ff;
-  --teal:#0891b2;--teal-l:#ecfeff;
-  --sh1:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
-  --sh2:0 4px 12px rgba(0,0,0,.1);
-  --sh3:0 8px 32px rgba(0,0,0,.15);
-  --sans:'Inter',system-ui,sans-serif;
-  --mono:'JetBrains Mono',monospace;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
-
-/* ── TOPBAR ── */
-.topbar{
-  height:52px;background:var(--white);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 18px;gap:12px;
-  box-shadow:var(--sh1);z-index:1000;flex-shrink:0;
-}
-.t-logo{display:flex;align-items:center;gap:9px;}
-.t-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#059669);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.t-name{font-weight:700;font-size:.95rem;letter-spacing:-.01em;}
-.t-name em{font-style:normal;color:var(--blue);}
-.t-sep{width:1px;height:20px;background:var(--border);}
-.t-sub{font-size:.72rem;color:var(--text3);font-weight:500;}
-.t-right{margin-left:auto;display:flex;gap:7px;align-items:center;}
-.t-badge{padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.04em;background:var(--blue-l);border:1px solid var(--blue-xl);color:var(--blue);}
-.gmaps-main{
-  display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:7px;
-  background:var(--green);border:none;color:#fff;
-  font-family:var(--sans);font-size:.75rem;font-weight:600;
-  cursor:pointer;transition:all .15s;box-shadow:var(--sh1);
-}
-.gmaps-main:hover{background:#047857;}
-.gmaps-main:disabled{opacity:.35;cursor:not-allowed;}
-
-/* ── LAYOUT ── */
-.layout{display:flex;flex:1;overflow:hidden;}
-
-/* ── LEFT SIDEBAR ── */
-.sidebar{
-  width:292px;background:var(--white);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;box-shadow:var(--sh2);z-index:500;flex-shrink:0;overflow:hidden;
-}
-.sb-scroll{flex:1;overflow-y:auto;}
-.sb-scroll::-webkit-scrollbar{width:4px;}
-.sb-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-
-.sec{border-bottom:1px solid var(--border);}
-.sec-h{
-  display:flex;align-items:center;gap:8px;padding:10px 14px;
-  cursor:pointer;background:var(--white);font-size:.78rem;font-weight:600;
-  color:var(--text2);user-select:none;transition:background .12s;
-}
-.sec-h:hover{background:var(--bg);}
-.sec-h .ico{font-size:.85rem;}
-.sec-h .ar{margin-left:auto;font-size:.6rem;color:var(--text3);transition:transform .2s;}
-.sec-h.open .ar{transform:rotate(180deg);}
-.sec-b{padding:11px 14px;display:none;flex-direction:column;gap:9px;}
-.sec-b.open{display:flex;}
-
-.flabel{font-size:.6rem;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
-.fsel{
-  width:100%;padding:7px 26px 7px 9px;
-  border:1px solid var(--border2);border-radius:7px;
-  background:var(--white);color:var(--text);
-  font-family:var(--sans);font-size:.82rem;
-  outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;
-  transition:border .12s;
-}
-.fsel:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
-
-/* ALGO PILLS */
-.algo-wrap{display:flex;gap:5px;}
-.apill{
-  padding:5px 11px;border-radius:16px;font-size:.73rem;font-weight:600;
-  border:1px solid var(--border2);background:var(--white);color:var(--text2);
-  cursor:pointer;transition:all .15s;
-}
-.apill:hover{box-shadow:var(--sh1);}
-.apill.on.d{background:var(--blue-l);border-color:var(--blue);color:var(--blue);}
-.apill.on.b{background:var(--green-l);border-color:var(--green);color:var(--green);}
-.apill.on.k{background:var(--amber-l);border-color:var(--amber);color:var(--amber);}
-.amini{font-size:.72rem;line-height:1.6;padding:7px 10px;border-radius:7px;display:none;}
-.amini.show{display:block;}
-.amini.d{background:var(--blue-l);border-left:3px solid var(--blue);color:#1e3a8a;}
-.amini.b{background:var(--green-l);border-left:3px solid var(--green);color:#064e3b;}
-.amini.k{background:var(--amber-l);border-left:3px solid var(--amber);color:#78350f;}
-.amini .tag{display:inline-block;font-family:var(--mono);font-size:.62rem;padding:1px 6px;border-radius:4px;margin:2px 2px 0;}
-.tag-b{background:var(--blue-xl);color:var(--blue);}
-.tag-g{background:var(--green-xl);color:var(--green);}
-.tag-a{background:var(--amber-xl);color:var(--amber);}
-
-/* CATEGORY FILTER */
-.cat-wrap{display:flex;flex-wrap:wrap;gap:4px;}
-.catbtn{
-  padding:3px 9px;border-radius:12px;font-size:.62rem;font-weight:600;letter-spacing:.03em;
-  border:1px solid var(--border2);background:var(--white);color:var(--text2);
-  cursor:pointer;transition:all .15s;
-}
-.catbtn.on{border-color:var(--amber);color:var(--amber);background:var(--amber-l);}
-.catbtn:hover:not(.on){background:var(--bg);}
-
-/* SPEED */
-.spd-row{display:flex;gap:4px;}
-.spd{
-  flex:1;padding:5px 2px;border-radius:12px;text-align:center;
-  font-size:.68rem;font-weight:600;border:1px solid var(--border2);
-  background:var(--white);color:var(--text2);cursor:pointer;transition:all .12s;
-}
-.spd.on{background:var(--blue-l);border-color:var(--blue);color:var(--blue);}
-
-/* STOPS */
-.stop-list{display:flex;flex-direction:column;gap:4px;}
-.stop-item{
-  display:flex;align-items:center;gap:7px;padding:6px 9px;
-  border-radius:7px;border:1px solid var(--border);background:var(--bg);font-size:.78rem;
-}
-.s-num{width:18px;height:18px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;flex-shrink:0;}
-.s-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.85rem;padding:1px 4px;border-radius:3px;transition:all .12s;margin-left:auto;}
-.s-del:hover{color:var(--red);background:var(--red-l);}
-.btn-add{
-  width:100%;padding:7px;border:1.5px dashed var(--blue);border-radius:7px;
-  background:transparent;color:var(--blue);font-family:var(--sans);font-size:.8rem;font-weight:600;
-  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;
-}
-.btn-add:hover{background:var(--blue-l);}
-.btn-solve{
-  width:100%;padding:10px;background:var(--blue);border:none;border-radius:8px;
-  color:#fff;font-family:var(--sans);font-size:.88rem;font-weight:700;
-  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;
-  box-shadow:0 2px 8px rgba(37,99,235,.3);
-}
-.btn-solve:hover{background:var(--blue-d);}
-.btn-solve:disabled{opacity:.35;cursor:not-allowed;}
-.btn-row{display:flex;gap:6px;}
-.btn-sm{
-  flex:1;padding:7px;border:1px solid var(--border2);border-radius:7px;
-  background:var(--white);color:var(--text2);font-family:var(--sans);font-size:.76rem;font-weight:500;
-  cursor:pointer;transition:all .15s;
-}
-.btn-sm:hover{box-shadow:var(--sh1);}
-.btn-sm.r:hover{border-color:var(--red);color:var(--red);background:var(--red-l);}
-.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
-.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:2px;transition:width .1s;}
-
-/* ── MAP ── */
-.map-wrap{flex:1;position:relative;z-index:0;}
-#map{width:100%;height:100%;}
-
-/* ── RIGHT PANEL ── */
-.rpanel{
-  width:330px;background:var(--white);border-left:1px solid var(--border);
-  display:flex;flex-direction:column;box-shadow:var(--sh2);z-index:500;flex-shrink:0;overflow:hidden;
-}
-.rp-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
-.rp-tab{
-  flex:1;padding:10px 4px;text-align:center;font-size:.7rem;font-weight:600;
-  color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;
-  margin-bottom:-1px;transition:all .15s;
-}
-.rp-tab.on{color:var(--blue);border-bottom-color:var(--blue);}
-.rp-tab:hover:not(.on){color:var(--text);}
-.rp-pane{display:none;flex:1;overflow-y:auto;padding:12px;flex-direction:column;gap:10px;}
-.rp-pane.on{display:flex;}
-.rp-pane::-webkit-scrollbar{width:4px;}
-.rp-pane::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-
-/* STATS */
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.sc{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;}
-.sc.full{grid-column:1/-1;}
-.sl{font-size:.56rem;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;}
-.sv{font-family:var(--mono);font-size:.96rem;font-weight:600;color:var(--text);}
-.sv.blue{color:var(--blue);}.sv.green{color:var(--green);}.sv.amber{color:var(--amber);}
-.sv.sm{font-size:.7rem;font-family:var(--sans);line-height:1.5;word-break:break-word;color:var(--text2);}
-
-/* KRUSKAL RESULTS PANEL */
-.kruskal-panel{background:var(--amber-l);border:1px solid #fde68a;border-radius:10px;overflow:hidden;}
-.kp-head{
-  background:linear-gradient(90deg,#d97706,#b45309);
-  color:#fff;padding:10px 14px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.kp-title{font-weight:700;font-size:.82rem;display:flex;align-items:center;gap:7px;}
-.kp-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 12px;}
-.kp-stat{background:#fff;border-radius:7px;padding:8px 10px;border:1px solid #fde68a;}
-.kp-sl{font-size:.55rem;font-weight:700;color:#92400e;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;}
-.kp-sv{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:#d97706;}
-.kp-edges{padding:0 12px 12px;}
-.kp-etitle{font-size:.62rem;font-weight:700;color:#92400e;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
-.kp-edge-list{display:flex;flex-direction:column;gap:3px;max-height:220px;overflow-y:auto;}
-.kp-edge-list::-webkit-scrollbar{width:3px;}
-.kp-edge-list::-webkit-scrollbar-thumb{background:#fcd34d;border-radius:2px;}
-.kp-edge-item{
-  display:flex;align-items:center;gap:8px;
-  padding:6px 9px;background:#fff;border-radius:6px;
-  border:1px solid #fde68a;font-size:.75rem;
-  transition:background .12s;
-}
-.kp-edge-item:hover{background:#fffbeb;}
-.kp-edge-num{width:20px;height:20px;border-radius:50%;background:var(--amber);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;}
-.kp-edge-name{flex:1;color:var(--text);}
-.kp-edge-km{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--amber);}
-.kp-total-bar{
-  margin:0 12px 12px;padding:8px 12px;background:#fff;
-  border-radius:7px;border:1px solid #fde68a;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.kp-total-bar span{font-size:.73rem;color:#92400e;font-weight:600;}
-.kp-total-bar strong{font-family:var(--mono);font-size:1rem;color:var(--amber);}
-
-/* PATH STEPS */
-.route-steps{display:flex;flex-direction:column;}
-.r-step{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
-.r-step:last-child{border-bottom:none;}
-.r-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:5px;}
-.r-dot.start{background:var(--green);}
-.r-dot.end{background:var(--red);}
-.r-node{font-weight:600;font-size:.78rem;}
-.r-dist{font-size:.68rem;color:var(--text3);margin-top:1px;}
-
-/* LEGEND */
-.legend{display:flex;flex-direction:column;gap:5px;}
-.leg{display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text2);}
-.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.leg-line{width:22px;height:3px;border-radius:2px;flex-shrink:0;}
-
-/* LOG */
-.log-box{
-  background:var(--bg);border:1px solid var(--border);border-radius:7px;
-  padding:7px 9px;font-family:var(--mono);font-size:.63rem;
-  max-height:80px;overflow-y:auto;color:var(--text2);line-height:1.75;
-}
-.log-box::-webkit-scrollbar{width:3px;}
-.log-box::-webkit-scrollbar-thumb{background:var(--border2);}
-.log-box .lb{color:var(--blue);}
-.log-box .lg{color:var(--green);}
-.log-box .lr{color:var(--red);}
-
-/* EXPLANATION */
-.expl-block{background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.expl-head{padding:9px 12px;font-weight:600;font-size:.78rem;display:flex;align-items:center;gap:7px;}
-.expl-head.d{background:var(--blue-l);color:var(--blue-d);}
-.expl-head.b{background:var(--green-l);color:var(--green);}
-.expl-head.k{background:var(--amber-l);color:var(--amber);}
-.expl-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
-.expl-txt{font-size:.76rem;line-height:1.7;color:var(--text2);}
-.expl-txt b{color:var(--text);}
-.nt-wrap{display:flex;flex-direction:column;gap:2px;max-height:180px;overflow-y:auto;}
-.nt-wrap::-webkit-scrollbar{width:3px;}
-.nt-wrap::-webkit-scrollbar-thumb{background:var(--border2);}
-.nt-item{display:flex;align-items:flex-start;gap:7px;padding:5px 7px;border-radius:5px;font-size:.73rem;}
-.nt-item.vis{background:rgba(37,99,235,.04);}
-.nt-item.path{background:rgba(5,150,105,.07);font-weight:500;}
-.nt-item.se{background:rgba(5,150,105,.1);font-weight:600;}
-.nt-num{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;color:#fff;margin-top:1px;}
-.nt-sub{font-size:.65rem;color:var(--text3);}
-.insight{font-size:.74rem;line-height:1.65;padding:8px 10px;border-radius:7px;color:var(--text2);}
-.insight.b{background:var(--blue-l);border-left:3px solid var(--blue);}
-.insight.g{background:var(--green-l);border-left:3px solid var(--green);}
-.insight.a{background:var(--amber-l);border-left:3px solid var(--amber);}
-
-/* PSEUDOCODE */
-.pseudo{
-  background:#0f172a;border-radius:9px;padding:12px 14px;
-  font-family:var(--mono);font-size:.68rem;line-height:2;overflow-x:auto;
-  color:#cbd5e1;
-}
-.pln{display:block;border-radius:3px;padding:0 4px;margin:0 -4px;transition:background .08s;}
-.pln.hl{background:rgba(251,191,36,.15);outline:1px solid rgba(251,191,36,.3);}
-.kw{color:#c084fc;}.fn{color:#67e8f9;}.cm{color:#475569;font-style:italic;}
-.vr{color:#fb923c;}.nm{color:#86efac;}.st{color:#a3e635;}
-
-/* POPUP */
-.pc{min-width:195px;max-width:240px;font-family:var(--sans);}
-.pc-h{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;}
-.pc-ico{font-size:22px;line-height:1;flex-shrink:0;}
-.pc-name{font-weight:700;font-size:.85rem;color:var(--text);line-height:1.3;}
-.pc-cat{font-size:.67rem;color:var(--text3);margin-top:1px;}
-.pc-desc{font-size:.75rem;color:var(--text2);line-height:1.55;margin-bottom:7px;}
-.pc-div{height:1px;background:var(--border);margin:6px 0;}
-.pc-row{display:flex;gap:5px;font-size:.71rem;color:var(--text2);margin-bottom:2px;align-items:center;}
-.pc-badge{display:inline-flex;align-items:center;gap:3px;font-size:.67rem;padding:2px 7px;border-radius:10px;font-weight:600;margin-bottom:6px;}
-.pc-badge.src{background:var(--blue-l);color:var(--blue);}
-.pc-badge.stop{background:var(--green-l);color:var(--green);}
-.pc-conns{font-size:.68rem;color:var(--text3);margin-top:4px;line-height:1.6;}
-.pc-addBtn{
-  margin-top:8px;width:100%;padding:6px;
-  border:1px solid var(--blue);border-radius:6px;
-  background:var(--blue-l);color:var(--blue);
-  font-family:var(--sans);font-size:.72rem;font-weight:600;
-  cursor:pointer;transition:all .15s;
-}
-.pc-addBtn:hover{background:var(--blue);color:#fff;}
-</style>
+<!-- Muat Ikon Lucide -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+<!-- Layar Login -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-header">
+      <h1>Surabaya<span>Route</span></h1>
+      <p>Autentikasi DAA Quiz 2</p>
+    </div>
+    <div class="login-body">
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Masukkan username (admin)">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Masukkan password (daa2026)">
+      </div>
+      <div id="loginError" class="login-error">Username atau password salah</div>
+      <button class="btn-login" onclick="attemptLogin()">Login ke Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Aplikasi Utama -->
+<div id="mainApp" style="display:none; height: 100%; flex-direction: column;">
 <div class="topbar">
   <div class="t-logo">
-    <div class="t-icon">🗺</div>
     <div class="t-name">Surabaya<em>Route</em></div>
   </div>
   <div class="t-sep"></div>
-  <span class="t-sub">EF234405 DAA · Quiz 2 · 2026</span>
+  <div class="t-mid">
+    <span class="t-sub">EF234405 DAA · Quiz 2 · 2026</span>
+    <span class="t-sub">Dijkstra · BFS · Kruskal MST</span>
+  </div>
   <div class="t-right">
-    <span class="t-badge">Dijkstra · BFS · Kruskal MST</span>
+    <button class="t-theme-btn" id="themeBtn" onclick="toggleTheme()" title="Ganti Tema">🌓</button>
     <span id="osrmStatus" style="font-size:.68rem;color:#d97706;font-weight:500;display:none;">⟳ Memuat peta jalan...</span>
     <button class="gmaps-main" id="gmapsBtn" onclick="openInGMaps()" disabled>
-      🗺 Buka di Google Maps
+      Buka di Google Maps
+    </button>
+    <button class="btn-sm r" style="padding: 6px 12px; height: 32px;" onclick="logout()">
+      Logout
     </button>
   </div>
 </div>
 
 <div class="layout">
 
-<!-- LEFT SIDEBAR -->
+<!-- SIDEBAR KIRI -->
 <aside class="sidebar">
 <div class="sb-scroll">
 
   <div class="sec">
-    <div class="sec-h open" onclick="toggleSec(this)"><span class="ico">🧠</span>Algoritma<span class="ar">▼</span></div>
+    <div class="sec-h open" onclick="toggleSec(this)">Algoritma<span class="ar">▼</span></div>
     <div class="sec-b open">
       <div class="algo-wrap">
         <div class="apill on d" onclick="setAlgo('dijkstra',this)">Dijkstra</div>
@@ -361,7 +87,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
   </div>
 
   <div class="sec">
-    <div class="sec-h open" onclick="toggleSec(this)"><span class="ico">🏨</span>Titik Asal<span class="ar">▼</span></div>
+    <div class="sec-h open" onclick="toggleSec(this)">Titik Asal<span class="ar">▼</span></div>
     <div class="sec-b open">
       <div class="flabel">Keberangkatan</div>
       <select class="fsel" id="selSrc" onchange="onSrcChange()"></select>
@@ -369,13 +95,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
   </div>
 
   <div class="sec">
-    <div class="sec-h open" onclick="toggleSec(this)"><span class="ico">🎯</span>Destinasi<span class="ar">▼</span></div>
+    <div class="sec-h open" onclick="toggleSec(this)">Destinasi<span class="ar">▼</span></div>
     <div class="sec-b open">
       <div class="flabel">Filter Kategori</div>
       <div class="cat-wrap" id="catWrap"></div>
       <div class="flabel" style="margin-top:4px;">Pilih destinasi</div>
-      <select class="fsel" id="selDst"></select>
-      <button class="btn-add" onclick="addStop()">＋ Tambah ke Rute</button>
+      <select class="fsel" id="selDst" onchange="onDstChange()"></select>
+      <button class="btn-add" onclick="addStop()">Tambah ke Rute</button>
       <div>
         <div class="flabel">Rute saya (<span id="stopCount">0</span>/6)</div>
         <div class="stop-list" id="stopList">
@@ -386,7 +112,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
   </div>
 
   <div class="sec">
-    <div class="sec-h open" onclick="toggleSec(this)"><span class="ico">⚡</span>Kecepatan<span class="ar">▼</span></div>
+    <div class="sec-h open" onclick="toggleSec(this)">Kecepatan<span class="ar">▼</span></div>
     <div class="sec-b open">
       <div class="spd-row">
         <div class="spd"    onclick="setSpd(120,this)">Lambat</div>
@@ -411,31 +137,31 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 </div>
 </aside>
 
-<!-- MAP -->
+<!-- PETA -->
 <div class="map-wrap"><div id="map"></div></div>
 
-<!-- RIGHT PANEL -->
+<!-- PANEL KANAN -->
 <div class="rpanel">
   <div class="rp-tabs">
-    <div class="rp-tab on"  onclick="switchTab('stats',this)">📊 Hasil</div>
-    <div class="rp-tab"     onclick="switchTab('explain',this)">🔍 Penjelasan</div>
-    <div class="rp-tab"     onclick="switchTab('pseudo',this)">📋 Pseudocode</div>
+    <div class="rp-tab on"  onclick="switchTab('stats',this)">Hasil</div>
+    <div class="rp-tab"     onclick="switchTab('explain',this)">Penjelasan</div>
+    <div class="rp-tab"     onclick="switchTab('pseudo',this)">Pseudocode</div>
   </div>
 
-  <!-- STATS -->
+  <!-- STATISTIK -->
   <div class="rp-pane on" id="pane-stats">
     <div class="sg">
       <div class="sc"><div class="sl">Total Jarak</div><div class="sv green" id="sDist">—</div></div>
       <div class="sc"><div class="sl">Destinasi</div><div class="sv blue" id="sStops">—</div></div>
-      <div class="sc"><div class="sl">Node Visited</div><div class="sv amber" id="sVis">—</div></div>
-      <div class="sc"><div class="sl">Exec Time</div><div class="sv" id="sTime">—</div></div>
+      <div class="sc"><div class="sl">Node Dikunjungi</div><div class="sv amber" id="sVis">—</div></div>
+      <div class="sc"><div class="sl">Waktu Eksekusi</div><div class="sv" id="sTime">—</div></div>
       <div class="sc full"><div class="sl">Rute Optimal</div><div class="sv sm" id="sRoute">—</div></div>
     </div>
 
-    <!-- KRUSKAL RESULTS PANEL (hidden until kruskal runs) -->
+    <!-- PANEL HASIL KRUSKAL (disembunyikan sampai algoritma dijalankan) -->
     <div id="kruskalPanel" style="display:none;"></div>
 
-    <!-- PATH STEPS (for Dijkstra/BFS) -->
+    <!-- LANGKAH RUTE (untuk Dijkstra/BFS) -->
     <div id="pathStepsWrap">
       <div class="flabel" style="margin-bottom:6px;">Detail Langkah</div>
       <div class="route-steps" id="routeSteps">
@@ -465,11 +191,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
     </div>
   </div>
 
-  <!-- EXPLAIN -->
+  <!-- PENJELASAN -->
   <div class="rp-pane" id="pane-explain">
     <div id="explainContent">
       <div class="insight b" style="font-size:.77rem;line-height:1.75;">
-        🔍 <b>Penjelasan algoritma</b> akan muncul otomatis setelah kamu klik <b>"Cari Rute Optimal"</b>.<br><br>
+        <b>Penjelasan algoritma</b> akan muncul otomatis setelah kamu klik <b>"Cari Rute Optimal"</b>.<br><br>
         Mencakup: urutan node dieksplorasi, proses edge relaxation / BFS level, rekonstruksi jalur via prev[], dan insight perbandingan hasil.
       </div>
     </div>
@@ -485,630 +211,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
   </div>
 </div>
 
-</div><!-- end layout -->
+</div><!-- Akhir layout -->
 
-<script>
-// ════════════════════════════════════════════════
-//  DATA
-// ════════════════════════════════════════════════
-const PLACES = [
-  {id:0, name:"Hotel Majapahit",        lat:-7.2575,lng:112.7378,ico:"🏨",cat:"hotel",   desc:"Hotel bersejarah era kolonial Belanda, dibangun 1910. Saksi Peristiwa Yamato 1945.",    hours:"24 jam",   ticket:"—",          rating:"⭐⭐⭐⭐⭐"},
-  {id:1, name:"Tunjungan Plaza",         lat:-7.2617,lng:112.7378,ico:"🛍",cat:"belanja",  desc:"Pusat perbelanjaan terbesar Surabaya dengan 6 menara. Ikon belanja kota Pahlawan.",     hours:"10–22",    ticket:"Gratis",      rating:"⭐⭐⭐⭐"},
-  {id:2, name:"Kebun Binatang Surabaya", lat:-7.2935,lng:112.7363,ico:"🦁",cat:"alam",    desc:"Kebun binatang tertua Asia Tenggara, didirikan 1916. Rumah 350+ spesies satwa.",        hours:"08–16",    ticket:"Rp 40.000",   rating:"⭐⭐⭐⭐"},
-  {id:3, name:"Tugu Pahlawan",           lat:-7.2459,lng:112.7378,ico:"🏛",cat:"sejarah", desc:"Monumen 41,15 m memperingati Pertempuran Surabaya 10 November 1945.",                   hours:"07–17",    ticket:"Rp 2.000",    rating:"⭐⭐⭐⭐⭐"},
-  {id:4, name:"House of Sampoerna",      lat:-7.2340,lng:112.7290,ico:"🏭",cat:"museum",  desc:"Museum kretek & galeri seni dalam bangunan Dutch colonial 1862. Wajib dikunjungi!",    hours:"09–22",    ticket:"Gratis",      rating:"⭐⭐⭐⭐⭐"},
-  {id:5, name:"Jembatan Merah",          lat:-7.2366,lng:112.7333,ico:"🌉",cat:"sejarah", desc:"Kawasan kota lama ikonik. Jembatan merah di jantung perdagangan kolonial Surabaya.",   hours:"Terbuka",  ticket:"Gratis",      rating:"⭐⭐⭐⭐"},
-  {id:6, name:"Taman Bungkul",           lat:-7.2893,lng:112.7357,ico:"🌳",cat:"taman",   desc:"Taman RTH favorit warga. Jogging track, skatepark, WiFi gratis & pujasera kuliner.",   hours:"24 jam",   ticket:"Gratis",      rating:"⭐⭐⭐⭐"},
-  {id:7, name:"Masjid Cheng Hoo",        lat:-7.2623,lng:112.7524,ico:"🕌",cat:"religi",  desc:"Masjid unik bergaya arsitektur Tiongkok, simbol harmoni Islam-Tionghoa di Surabaya.",  hours:"05–21",    ticket:"Gratis",      rating:"⭐⭐⭐⭐⭐"},
-  {id:8, name:"Kampung Lawas Maspati",   lat:-7.2466,lng:112.7298,ico:"🏘",cat:"budaya",  desc:"Kampung heritage tertua Surabaya usia 200+ tahun. Wisata budaya dan kuliner otentik.",  hours:"08–17",    ticket:"Gratis",      rating:"⭐⭐⭐⭐"},
-  {id:9, name:"Kenjeran Park",           lat:-7.2279,lng:112.8005,ico:"🏖",cat:"alam",    desc:"Taman bahari tepi pantai, wahana, perahu & view Selat Madura yang menawan.",           hours:"06–18",    ticket:"Rp 10.000",   rating:"⭐⭐⭐⭐"},
-  {id:10,name:"Monumen Kapal Selam",     lat:-7.2650,lng:112.7482,ico:"⚓",cat:"museum",  desc:"Museum di dalam KRI Pasopati 410 asli TNI AL. Pengalaman di dalam kapal selam nyata.", hours:"08–22",    ticket:"Rp 15.000",   rating:"⭐⭐⭐⭐⭐"},
-  {id:11,name:"Kya-Kya Kembang Jepun",  lat:-7.2388,lng:112.7376,ico:"🏮",cat:"kuliner", desc:"Kawasan pecinan & wisata kuliner malam. Jajanan dengan suasana Tionghoa yang kental.", hours:"17–00",    ticket:"Gratis",      rating:"⭐⭐⭐⭐"},
-  {id:12,name:"Pelabuhan Tanjung Perak", lat:-7.1975,lng:112.7317,ico:"🚢",cat:"modern",  desc:"Pelabuhan terbesar Indonesia Timur. Spot foto kapal dan aktivitas pelabuhan internasional.",hours:"Terbuka",ticket:"Gratis",    rating:"⭐⭐⭐"},
-  {id:13,name:"G-Walk Citraland",        lat:-7.2892,lng:112.6633,ico:"🍽",cat:"kuliner", desc:"Pusat kuliner & hiburan outdoor terbesar Surabaya Barat. Ratusan tenant pilihan.",      hours:"10–22",    ticket:"Gratis",      rating:"⭐⭐⭐⭐"},
-  {id:14,name:"Delta Plaza",             lat:-7.2617,lng:112.7468,ico:"🏬",cat:"belanja",  desc:"Mall & bioskop strategis di jantung kota, dekat Stasiun Gubeng Surabaya.",            hours:"10–22",    ticket:"Gratis",      rating:"⭐⭐⭐"},
-  {id:15,name:"Surabaya North Quay",     lat:-7.2059,lng:112.7250,ico:"⛴",cat:"modern",  desc:"Waterfront modern di Pelabuhan Tanjung Perak, kafe, pameran & view malam indah.",      hours:"10–21",    ticket:"Gratis",      rating:"⭐⭐⭐⭐"},
-  {id:16,name:"Masjid Al-Akbar",         lat:-7.3369,lng:112.7275,ico:"🕌",cat:"religi",  desc:"Masjid terbesar kedua Indonesia. Arsitektur megah, kubah biru ikonik Surabaya.",       hours:"04–21",    ticket:"Gratis",      rating:"⭐⭐⭐⭐⭐"},
-  {id:17,name:"Ekowisata Mangrove",      lat:-7.3203,lng:112.8135,ico:"🌿",cat:"alam",    desc:"Hutan mangrove 188 ha dengan track kayu & perahu susur sungai, eco-tourism terbaik.",  hours:"07–17",    ticket:"Rp 5.000",    rating:"⭐⭐⭐⭐"},
-];
-
-const EDGES = [
-  [0,1,0.4],[0,3,1.5],[0,10,1.2],[0,7,1.8],[0,11,0.9],
-  [1,2,3.5],[1,3,1.2],[1,10,0.9],[1,6,3.2],[1,14,0.8],
-  [2,6,0.3],[2,13,7.8],
-  [3,4,1.8],[3,5,1.4],[3,8,0.9],[3,11,0.8],
-  [4,5,0.7],[4,8,1.0],[4,12,4.2],[4,15,5.1],
-  [5,11,0.6],[5,12,3.8],
-  [6,2,0.3],[6,13,7.5],[6,16,5.2],
-  [7,10,0.5],[7,9,7.0],[7,14,0.9],
-  [8,11,1.0],
-  [9,12,6.5],[9,17,4.2],
-  [10,14,0.8],[10,1,0.9],
-  [11,3,0.8],[11,5,0.6],
-  [12,4,4.2],[12,15,0.9],
-  [13,6,7.5],[13,16,4.8],
-  [14,7,0.9],[14,1,0.8],
-  [15,12,0.9],[15,4,5.1],
-  [16,6,5.2],[16,13,4.8],
-  [17,9,4.2],
-];
-
-const ADJ={};
-PLACES.forEach(p=>ADJ[p.id]=[]);
-EDGES.forEach(([a,b,w])=>{ADJ[a].push({to:b,w});ADJ[b].push({to:a,w});});
-
-const CAT_LABELS = {all:'Semua',hotel:'Hotel',sejarah:'Sejarah',museum:'Museum',alam:'Alam',taman:'Taman',budaya:'Budaya',religi:'Religi',kuliner:'Kuliner',belanja:'Belanja',modern:'Modern'};
-const CAT_COLORS = {hotel:'#2563eb',sejarah:'#dc2626',museum:'#7c3aed',alam:'#059669',taman:'#16a34a',budaya:'#d97706',religi:'#0891b2',kuliner:'#ea580c',belanja:'#db2777',modern:'#0e7490'};
-
-// ── STATE ──
-let srcId=0, stops=[], algo='dijkstra', animSpd=40, running=false;
-let visitedMarkers=[], pathLines=[], mstLines=[], allMarkers=[], baseEdgeLines=[];
-let activeCategory='all', lastRoute=null;
-// Cache OSRM geometries: key = "a-b" → LatLng[]
-const routeCache = {};
-
-// ── MAP ──
-const map = L.map('map',{zoomControl:true}).setView([-7.265,112.745],13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19
-}).addTo(map);
-
-// ── OSRM HELPERS ──
-async function fetchOSRM(latA,lngA,latB,lngB){
-  const url=`https://router.project-osrm.org/route/v1/driving/${lngA},${latA};${lngB},${latB}?overview=full&geometries=geojson`;
-  try{
-    const r=await fetch(url);
-    const d=await r.json();
-    if(d.routes&&d.routes[0]){
-      return d.routes[0].geometry.coordinates.map(([lng,lat])=>([lat,lng]));
-    }
-  }catch(e){}
-  // Fallback: straight line
-  return [[latA,lngA],[latB,lngB]];
-}
-
-async function getRouteGeom(a,b){
-  const key=`${Math.min(a,b)}-${Math.max(a,b)}`;
-  if(routeCache[key])return routeCache[key];
-  const pa=PLACES[a],pb=PLACES[b];
-  const geom=await fetchOSRM(pa.lat,pa.lng,pb.lat,pb.lng);
-  routeCache[key]=geom;
-  return geom;
-}
-
-// Draw base edges with OSRM routing (async, batched)
-async function drawBaseEdges(){
-  document.getElementById('osrmStatus').style.display='inline';
-  // Draw straight lines immediately as placeholder
-  baseEdgeLines.forEach(l=>map.removeLayer(l)); baseEdgeLines=[];
-  EDGES.forEach(([a,b,w])=>{
-    const pa=PLACES[a],pb=PLACES[b];
-    const l=L.polyline([[pa.lat,pa.lng],[pb.lat,pb.lng]],{color:'#cbd5e1',weight:2,opacity:.5}).addTo(map);
-    baseEdgeLines.push(l);
-    // Weight label at midpoint
-    const ml=(pa.lat+pb.lat)/2,mg=(pa.lng+pb.lng)/2;
-    L.marker([ml,mg],{
-      icon:L.divIcon({html:`<div style="font-size:8.5px;color:#94a3b8;background:rgba(255,255,255,.92);padding:1px 4px;border-radius:3px;border:1px solid #e2e8f0;white-space:nowrap;">${w}km</div>`,className:'',iconAnchor:[14,7]}),
-      interactive:false
-    }).addTo(map);
-  });
-  // Then upgrade each to OSRM geometry in background (batch with delay to avoid rate limit)
-  for(let i=0;i<EDGES.length;i++){
-    const [a,b]=EDGES[i];
-    const geom=await getRouteGeom(a,b);
-    // Replace placeholder line
-    if(baseEdgeLines[i]){
-      map.removeLayer(baseEdgeLines[i]);
-      baseEdgeLines[i]=L.polyline(geom,{color:'#cbd5e1',weight:2,opacity:.6}).addTo(map);
-    }
-    document.getElementById('osrmStatus').textContent=`⟳ Memuat jalan ${i+1}/${EDGES.length}...`;
-    // Small delay to be polite to OSRM public server
-    await sleep(60);
-  }
-  document.getElementById('osrmStatus').style.display='none';
-  log('Peta jalan dimuat via OSRM ✓','lg');
-}
-drawBaseEdges();
-
-function makeIcon(p){
-  const isSrc=p.id===srcId, isStop=stops.includes(p.id);
-  const bg=isSrc?'#2563eb':isStop?'#059669':'#e37400';
-  const sz=isSrc||isStop?38:28;
-  const border=isSrc?'3px solid #93c5fd':isStop?'3px solid #6ee7b7':'2px solid white';
-  return L.divIcon({
-    html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${bg};border:${border};display:flex;align-items:center;justify-content:center;font-size:${sz>28?16:13}px;box-shadow:0 2px 8px rgba(0,0,0,.25);">${p.ico}</div>`,
-    className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]
-  });
-}
-function makePopup(p){
-  const isSrc=p.id===srcId,isStop=stops.includes(p.id);
-  const badge=isSrc?'<span class="pc-badge src">📍 Titik Asal</span>':isStop?'<span class="pc-badge stop">🎯 Destinasi</span>':'';
-  const conns=ADJ[p.id].map(e=>`${PLACES[e.to].ico}${PLACES[e.to].name.split(' ')[0]}(${e.w}km)`).join(' · ');
-  return`<div class="pc">
-    <div class="pc-h"><div class="pc-ico">${p.ico}</div><div><div class="pc-name">${p.name}</div><div class="pc-cat">${CAT_LABELS[p.cat]||p.cat}</div></div></div>
-    ${badge?`<div style="margin-bottom:6px;">${badge}</div>`:''}
-    <div class="pc-desc">${p.desc}</div>
-    <div class="pc-div"></div>
-    <div class="pc-row">🕐 <b>Jam:</b>&nbsp;${p.hours}</div>
-    <div class="pc-row">🎟 <b>Tiket:</b>&nbsp;${p.ticket}</div>
-    <div class="pc-row">${p.rating}</div>
-    <div class="pc-conns">🔗 ${conns}</div>
-    ${!isStop&&p.id!==srcId?`<button class="pc-addBtn" onclick="addStopById(${p.id})">＋ Tambah ke Rute</button>`:''}
-  </div>`;
-}
-function drawAllMarkers(){
-  allMarkers.forEach(m=>map.removeLayer(m)); allMarkers=[];
-  PLACES.forEach(p=>{
-    const m=L.marker([p.lat,p.lng],{icon:makeIcon(p)}).addTo(map).bindPopup(makePopup(p),{maxWidth:260});
-    allMarkers.push(m);
-  });
-}
-drawAllMarkers();
-
-// ── SELECTS & CATEGORY ──
-function buildCatFilter(){
-  const cats=['all','hotel','sejarah','museum','alam','taman','budaya','religi','kuliner','belanja','modern'];
-  document.getElementById('catWrap').innerHTML = cats.map(c=>
-    `<button class="catbtn${c===activeCategory?' on':''}" onclick="setCategory('${c}',this)">${CAT_LABELS[c]||c}</button>`
-  ).join('');
-}
-function setCategory(cat,btn){
-  activeCategory=cat;
-  document.querySelectorAll('.catbtn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  buildDstSelect();
-}
-function buildDstSelect(){
-  const dst=document.getElementById('selDst');
-  const pool = activeCategory==='all' ? PLACES : PLACES.filter(p=>p.cat===activeCategory);
-  dst.innerHTML=pool.map(p=>`<option value="${p.id}">${p.ico} ${p.name}</option>`).join('');
-}
-function populateSrc(){
-  document.getElementById('selSrc').innerHTML=PLACES.map(p=>`<option value="${p.id}">${p.ico} ${p.name}</option>`).join('');
-}
-populateSrc(); buildDstSelect(); buildCatFilter();
-
-function onSrcChange(){srcId=parseInt(document.getElementById('selSrc').value);clearRoute();drawAllMarkers();}
-
-// ── STOPS ──
-function addStop(){
-  const v=parseInt(document.getElementById('selDst').value);
-  addStopById(v);
-}
-function addStopById(v){
-  if(v===srcId){log('Destinasi sama dengan asal!','lr');return;}
-  if(stops.includes(v)){log('Sudah ada di rute!','lr');return;}
-  if(stops.length>=6){log('Maks 6 destinasi.','lr');return;}
-  stops.push(v);renderStops();drawAllMarkers();
-  map.setView([PLACES[v].lat,PLACES[v].lng],15);
-  log('Tambah: '+PLACES[v].ico+' '+PLACES[v].name,'lb');
-}
-function removeStop(id){stops=stops.filter(s=>s!==id);renderStops();clearRoute();drawAllMarkers();}
-function renderStops(){
-  const el=document.getElementById('stopList');
-  document.getElementById('stopCount').textContent=stops.length;
-  if(!stops.length){el.innerHTML='<div style="font-size:.74rem;color:var(--text3);text-align:center;padding:8px;">Belum ada destinasi</div>';return;}
-  el.innerHTML=stops.map((id,i)=>`
-    <div class="stop-item">
-      <div class="s-num">${i+1}</div>
-      <span style="flex:1;font-size:.77rem;">${PLACES[id].ico} ${PLACES[id].name.split('(')[0].trim()}</span>
-      <button class="s-del" onclick="removeStop(${id})">✕</button>
-    </div>`).join('');
-}
-
-// ── ALGORITHMS ──
-class MinHeap{
-  constructor(){this.h=[];}
-  push(x){this.h.push(x);this._up(this.h.length-1);}
-  pop(){const t=this.h[0],l=this.h.pop();if(this.h.length){this.h[0]=l;this._dn(0);}return t;}
-  get size(){return this.h.length;}
-  _up(i){while(i>0){const p=(i-1)>>1;if(this.h[p][0]<=this.h[i][0])break;[this.h[p],this.h[i]]=[this.h[i],this.h[p]];i=p;}}
-  _dn(i){const n=this.h.length;while(true){let s=i,l=2*i+1,r=2*i+2;if(l<n&&this.h[l][0]<this.h[s][0])s=l;if(r<n&&this.h[r][0]<this.h[s][0])s=r;if(s===i)break;[this.h[s],this.h[i]]=[this.h[i],this.h[s]];i=s;}}
-}
-
-function dijkstraRun(src,tgt){
-  const dist={},prev={},vis=[];
-  PLACES.forEach(p=>dist[p.id]=Infinity);
-  dist[src]=0;const heap=new MinHeap();heap.push([0,src]);
-  while(heap.size){
-    const[d,u]=heap.pop();if(vis.includes(u))continue;vis.push(u);if(u===tgt)break;
-    for(const{to,w}of ADJ[u])if(d+w<dist[to]){dist[to]=d+w;prev[to]=u;heap.push([d+w,to]);}
-  }
-  return{dist:dist[tgt],prev,visited:vis};
-}
-function bfsRun(src,tgt){
-  const prev={},vis=[],seen=new Set([src]),q=[src];
-  while(q.length){const u=q.shift();vis.push(u);if(u===tgt)break;for(const{to}of ADJ[u])if(!seen.has(to)){seen.add(to);prev[to]=u;q.push(to);}}
-  const path=recon(prev,src,tgt)||[];
-  let d=0;for(let i=0;i<path.length-1;i++){const e=ADJ[path[i]].find(x=>x.to===path[i+1]);if(e)d+=e.w;}
-  return{dist:d,prev,visited:vis};
-}
-function kruskalRun(){
-  const parent=PLACES.map((_,i)=>i);
-  function find(x){while(parent[x]!==x){parent[x]=parent[parent[x]];x=parent[x];}return x;}
-  function union(a,b){const ra=find(a),rb=find(b);if(ra===rb)return false;parent[ra]=rb;return true;}
-  const sorted=[...EDGES].sort((a,b)=>a[2]-b[2]);
-  const mst=[];let tw=0;
-  for(const[a,b,w]of sorted)if(union(a,b)){mst.push([a,b,w]);tw+=w;if(mst.length===PLACES.length-1)break;}
-  return{mst,totalW:tw,visited:[...new Set(mst.flatMap(e=>[e[0],e[1]]))]};
-}
-function recon(prev,src,tgt){const p=[];let c=tgt;while(c!==undefined){p.unshift(c);c=prev[c];}return p[0]===src?p:null;}
-
-// ── PSEUDOCODE ──
-const PSEUDO={
-  dijkstra:[
-    {id:'d1', text:`<span class="kw">function</span> <span class="fn">Dijkstra</span>(<span class="vr">graph</span>, <span class="vr">src</span>, <span class="vr">tgt</span>):`},
-    {id:'d2', text:`  <span class="cm">// Init semua dist = ∞</span>`},
-    {id:'d3', text:`  <span class="kw">for each</span> node <span class="vr">v</span>: dist[v] ← <span class="nm">∞</span>`},
-    {id:'d4', text:`  dist[<span class="vr">src</span>] ← <span class="nm">0</span>`},
-    {id:'d5', text:`  heap ← PriorityQueue()  <span class="cm">// min-heap</span>`},
-    {id:'d6', text:`  heap.<span class="fn">push</span>([<span class="nm">0</span>, src])`},
-    {id:'d7', text:`  <span class="kw">while</span> heap <span class="kw">not empty</span>:`},
-    {id:'d8', text:`    [d, u] ← heap.<span class="fn">extractMin</span>()  <span class="cm">// node jarak terkecil</span>`},
-    {id:'d9', text:`    <span class="kw">if</span> u == <span class="vr">tgt</span>: <span class="kw">break</span>`},
-    {id:'d10',text:`    <span class="kw">for each</span> neighbor <span class="vr">v</span> <span class="kw">of</span> u:`},
-    {id:'d11',text:`      <span class="kw">if</span> d + w(u,v) &lt; dist[<span class="vr">v</span>]:  <span class="cm">// relaxation</span>`},
-    {id:'d12',text:`        dist[v] ← d + w(u,v)`},
-    {id:'d13',text:`        prev[v] ← u`},
-    {id:'d14',text:`        heap.<span class="fn">push</span>([dist[v], v])`},
-    {id:'d15',text:`  <span class="kw">return</span> <span class="fn">reconstruct</span>(prev, src, tgt)`},
-  ],
-  bfs:[
-    {id:'b1', text:`<span class="kw">function</span> <span class="fn">BFS</span>(<span class="vr">graph</span>, <span class="vr">src</span>, <span class="vr">tgt</span>):`},
-    {id:'b2', text:`  queue ← Queue()  <span class="cm">// FIFO</span>`},
-    {id:'b3', text:`  queue.<span class="fn">enqueue</span>(src)`},
-    {id:'b4', text:`  visited ← {src}`},
-    {id:'b5', text:`  prev ← {}`},
-    {id:'b6', text:`  <span class="kw">while</span> queue <span class="kw">not empty</span>:`},
-    {id:'b7', text:`    u ← queue.<span class="fn">dequeue</span>()  <span class="cm">// ambil paling depan</span>`},
-    {id:'b8', text:`    <span class="kw">if</span> u == <span class="vr">tgt</span>: <span class="kw">break</span>`},
-    {id:'b9', text:`    <span class="kw">for each</span> neighbor <span class="vr">v</span> <span class="kw">of</span> u:`},
-    {id:'b10',text:`      <span class="kw">if</span> v <span class="kw">not in</span> visited:`},
-    {id:'b11',text:`        visited.<span class="fn">add</span>(v)`},
-    {id:'b12',text:`        prev[v] ← u`},
-    {id:'b13',text:`        queue.<span class="fn">enqueue</span>(v)`},
-    {id:'b14',text:`  <span class="kw">return</span> <span class="fn">reconstruct</span>(prev, src, tgt)`},
-  ],
-  kruskal:[
-    {id:'k1', text:`<span class="kw">function</span> <span class="fn">Kruskal</span>(<span class="vr">graph</span>):`},
-    {id:'k2', text:`  <span class="cm">// Urutkan semua edge ascending</span>`},
-    {id:'k3', text:`  edges ← <span class="fn">sort</span>(graph.edges, by=weight)`},
-    {id:'k4', text:`  uf ← <span class="fn">UnionFind</span>(graph.nodes)`},
-    {id:'k5', text:`  mst ← []`},
-    {id:'k6', text:`  <span class="kw">for each</span> edge (u, v, w) <span class="kw">in</span> edges:`},
-    {id:'k7', text:`    <span class="kw">if</span> uf.<span class="fn">find</span>(u) ≠ uf.<span class="fn">find</span>(v):  <span class="cm">// bukan siklus</span>`},
-    {id:'k8', text:`      mst.<span class="fn">add</span>(u, v, w)`},
-    {id:'k9', text:`      uf.<span class="fn">union</span>(u, v)  <span class="cm">// gabungkan komponen</span>`},
-    {id:'k10',text:`      <span class="kw">if</span> |mst| == V−1: <span class="kw">break</span>`},
-    {id:'k11',text:`  <span class="kw">return</span> mst  <span class="cm">// V−1 edges, bobot total minimum</span>`},
-  ],
-};
-
-function renderPseudo(key,hlIds=[]){
-  const lines=PSEUDO[key];
-  document.getElementById('pseudoBlock').innerHTML=
-    `<div class="pseudo">${lines.map(l=>`<span class="pln${hlIds.includes(l.id)?' hl':''}" id="pl-${l.id}">${l.text}</span>`).join('\n')}</div>`;
-}
-renderPseudo('dijkstra');
-
-function hlPseudo(key,ids){
-  renderPseudo(key,ids);
-  // Auto-scroll to first highlighted line
-  if(ids.length){
-    const el=document.getElementById('pl-'+ids[0]);
-    if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});
-  }
-}
-
-// ── GOOGLE MAPS ──
-function openInGMaps(){
-  if(!lastRoute||lastRoute.length<1)return;
-  const origin=`${PLACES[lastRoute[0]].lat},${PLACES[lastRoute[0]].lng}`;
-  const dest=`${PLACES[lastRoute[lastRoute.length-1]].lat},${PLACES[lastRoute[lastRoute.length-1]].lng}`;
-  const wps=lastRoute.slice(1,-1).map(id=>`${PLACES[id].lat},${PLACES[id].lng}`).join('|');
-  let url=`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving`;
-  if(wps)url+=`&waypoints=${wps}`;
-  window.open(url,'_blank');
-}
-
-// ── KRUSKAL RESULTS PANEL ──
-function renderKruskalPanel(result){
-  const {mst,totalW}=result;
-  const skipped=EDGES.length-mst.length;
-  let html=`<div class="kruskal-panel">
-    <div class="kp-head">
-      <div class="kp-title">🌳 KRUSKAL Results — MST Surabaya</div>
-      <span style="font-size:.68rem;opacity:.85;">${PLACES.length} nodes</span>
-    </div>
-    <div class="kp-stats">
-      <div class="kp-stat"><div class="kp-sl">Total MST Weight</div><div class="kp-sv">${totalW.toFixed(1)} km</div></div>
-      <div class="kp-stat"><div class="kp-sl">Edges in MST</div><div class="kp-sv">${mst.length}</div></div>
-      <div class="kp-stat"><div class="kp-sl">Edges Skipped</div><div class="kp-sv" style="color:#dc2626">${skipped}</div></div>
-      <div class="kp-stat"><div class="kp-sl">Total Edges</div><div class="kp-sv" style="color:var(--text2)">${EDGES.length}</div></div>
-    </div>
-    <div class="kp-total-bar">
-      <span>Total Bobot MST</span>
-      <strong>${totalW.toFixed(1)} km</strong>
-    </div>
-    <div class="kp-edges">
-      <div class="kp-etitle">MST Edges (${mst.length} edges, urutan dipilih)</div>
-      <div class="kp-edge-list">`;
-  mst.forEach(([a,b,w],i)=>{
-    html+=`<div class="kp-edge-item">
-      <div class="kp-edge-num">${i+1}</div>
-      <div class="kp-edge-name">${PLACES[a].ico} <b>${PLACES[a].name.split(' ').slice(0,2).join(' ')}</b> ↔ ${PLACES[b].ico} <b>${PLACES[b].name.split(' ').slice(0,2).join(' ')}</b></div>
-      <div class="kp-edge-km">${w} km</div>
-    </div>`;
-  });
-  html+=`</div></div></div>`;
-  document.getElementById('kruskalPanel').innerHTML=html;
-  document.getElementById('kruskalPanel').style.display='block';
-  document.getElementById('pathStepsWrap').style.display='none';
-}
-
-// ── EXPLANATION ──
-function buildExplanation(key,segs){
-  const cls={dijkstra:'d',bfs:'b',kruskal:'k'}[key];
-  const color={dijkstra:'var(--blue)',bfs:'var(--green)',kruskal:'var(--amber)'}[key];
-  const aName={dijkstra:'Dijkstra',bfs:'BFS',kruskal:'Kruskal MST'}[key];
-  let html='';
-
-  if(key==='kruskal'){
-    const r=segs[0].result;
-    html+=`<div class="expl-block">
-      <div class="expl-head k">🌳 Kruskal MST — Analisis Jaringan ${PLACES.length} Destinasi</div>
-      <div class="expl-body">
-        <div class="expl-txt"><b>Kruskal</b> bukan mencari rute A→B, melainkan membangun <b>Minimum Spanning Tree</b> — jaringan minimum yang menghubungkan semua ${PLACES.length} destinasi sekaligus.<br><br>
-        <b>Proses:</b> ${EDGES.length} edge diurutkan ascending. Tiap edge dicoba ditambah — jika kedua ujungnya berbeda komponen (cek via Union-Find), edge masuk MST. Jika sama komponen, dibuang (mencegah siklus).</div>
-        <div class="insight a">📊 <b>${r.mst.length}/${EDGES.length}</b> edge masuk MST &nbsp;|&nbsp; <b>${EDGES.length-r.mst.length}</b> edge dibuang karena siklus<br>
-        Total bobot MST: <b style="color:var(--amber)">${r.totalW.toFixed(1)} km</b></div>
-      </div></div>`;
-    return html;
-  }
-
-  segs.forEach((seg,si)=>{
-    const{src,tgt,result,path}=seg;
-    const vis=result.visited;
-    html+=`<div class="expl-block">
-      <div class="expl-head ${cls}">${aName} Segmen ${si+1}/${segs.length}: ${PLACES[src].ico} ${PLACES[src].name.split(' ').slice(0,2).join(' ')} → ${PLACES[tgt].ico} ${PLACES[tgt].name.split(' ').slice(0,2).join(' ')}</div>
-      <div class="expl-body">`;
-    if(key==='dijkstra'){
-      html+=`<div class="expl-txt">
-        <b>Init:</b> Semua node dist=∞, kecuali ${PLACES[src].name.split(' ')[0]}=0. Masuk min-heap.<br>
-        <b>Eksplorasi:</b> Heap extractMin() ambil node jarak terkecil. Dari ${PLACES[src].name.split(' ')[0]}, periksa ${ADJ[src].length} tetangga: ${ADJ[src].map(e=>PLACES[e.to].name.split(' ')[0]+'('+e.w+'km)').join(', ')}.<br>
-        <b>Edge Relaxation:</b> Jika dist[u]+w(u,v) &lt; dist[v], update dist[v] dan prev[v].
-      </div>`;
-    } else {
-      html+=`<div class="expl-txt">
-        <b>Init:</b> ${PLACES[src].name.split(' ')[0]} dimasukkan ke queue FIFO dan ditandai visited.<br>
-        <b>Level-by-level:</b> BFS dequeue dari depan, enqueue semua tetangga belum visited ke belakang.<br>
-        <b>Level 1</b> dari ${PLACES[src].name.split(' ')[0]}: ${ADJ[src].map(e=>PLACES[e.to].name.split(' ')[0]).join(', ')}.
-      </div>`;
-    }
-    html+=`<div class="flabel" style="font-size:.59rem;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">Node dieksplorasi (${vis.length})</div>
-      <div class="nt-wrap">`;
-    vis.forEach((id,idx)=>{
-      const isS=id===src,isT=id===tgt,onP=path&&path.includes(id);
-      const type=isS||isT?'se':onP?'path':'vis';
-      const lbl=isS?'▶ Start':isT?'🎯 Target ditemukan!':onP?'✓ Di jalur akhir':'○ Eksplorasi saja';
-      html+=`<div class="nt-item ${type}">
-        <div class="nt-num" style="background:${isS?'var(--green)':isT?'var(--red)':onP?'var(--blue)':'#94a3b8'}">${idx+1}</div>
-        <div><div>${PLACES[id].ico} <b>${PLACES[id].name.split(' ').slice(0,2).join(' ')}</b></div>
-        <div class="nt-sub">${lbl}</div></div></div>`;
-    });
-    html+=`</div>`;
-    if(path&&path.length>1){
-      let sd=0;for(let i=0;i<path.length-1;i++){const e=EDGES.find(x=>(x[0]===path[i]&&x[1]===path[i+1])||(x[0]===path[i+1]&&x[1]===path[i]));if(e)sd+=e[2];}
-      const pn=path.map(id=>`${PLACES[id].ico}${PLACES[id].name.split(' ')[0]}`).join(' → ');
-      html+=`<div class="expl-txt"><b>Rekonstruksi via prev[]:</b><br>
-        <span style="color:${color};font-weight:600;font-size:.72rem;">${pn}</span><br>
-        Jarak: <b style="color:${color}">${sd.toFixed(1)} km</b>${key==='bfs'?` · <b>${path.length-1} hop</b>`:''}
-      </div>`;
-    }
-    const ic=key==='dijkstra'?'b':'g';
-    const it=key==='dijkstra'
-      ?`Dijkstra visited <b>${vis.length}/${PLACES.length} node</b>. Min-heap memastikan node terdekat selalu diproses lebih dulu — jaminan jalur optimal.`
-      :`BFS visited <b>${vis.length}/${PLACES.length} node</b> secara level per level. Jalur memiliki <b>${path?path.length-1:'?'} hop</b> (minimum), namun belum tentu km terpendek.`;
-    html+=`<div class="insight ${ic}">💡 ${it}</div></div></div>`;
-  });
-  return html;
-}
-
-// ── SOLVE ──
-async function solve(){
-  if(running)return;
-  if(algo!=='kruskal'&&stops.length===0){log('Tambah minimal 1 destinasi!','lr');return;}
-  running=true;clearRoute(false);
-  document.getElementById('btnSolve').disabled=true;
-  document.getElementById('gmapsBtn').disabled=true;
-  log('Menjalankan '+algo.toUpperCase()+'...','lb');
-  renderPseudo(algo);
-  const t0=performance.now();
-
-  if(algo==='kruskal'){
-    hlPseudo('kruskal',['k1','k3','k4']);
-    await sleep(animSpd*2);
-
-    const r=kruskalRun();
-
-    hlPseudo('kruskal',['k6','k7']);
-    // Animate visited
-    for(const id of r.visited){
-      const p=PLACES[id];
-      const c=L.circleMarker([p.lat,p.lng],{radius:18,fillColor:'#d97706',fillOpacity:.12,color:'#d97706',weight:1.5,opacity:.4}).addTo(map);
-      visitedMarkers.push(c);
-      if(animSpd>0)await sleep(animSpd);
-    }
-
-    hlPseudo('kruskal',['k8','k9','k10']);
-    // Animate MST edges one by one with OSRM routing
-    for(const[a,b] of r.mst){
-      const geom=await getRouteGeom(a,b);
-      const l=L.polyline(geom,{color:'#059669',weight:5,opacity:.9}).addTo(map);
-      mstLines.push(l);
-      if(animSpd>0)await sleep(animSpd*1.5);
-    }
-
-    hlPseudo('kruskal',['k11']);
-    drawAllMarkers();
-
-    const el=(performance.now()-t0).toFixed(3);
-    setStats(r.totalW.toFixed(1)+' km', PLACES.length+' node', r.visited.length, el+' ms', `MST: ${r.mst.length} edges`);
-    renderKruskalPanel(r);
-
-    // Fit map to all MST nodes
-    const lats=r.mst.flatMap(e=>[PLACES[e[0]].lat,PLACES[e[1]].lat]);
-    const lngs=r.mst.flatMap(e=>[PLACES[e[0]].lng,PLACES[e[1]].lng]);
-    map.fitBounds([[Math.min(...lats)-.01,Math.min(...lngs)-.01],[Math.max(...lats)+.01,Math.max(...lngs)+.01]]);
-
-    document.getElementById('prog').style.width='100%';
-    log('MST selesai! Total: '+r.totalW.toFixed(1)+' km, '+r.mst.length+' edges ('+el+' ms)','lg');
-
-    document.getElementById('explainContent').innerHTML=buildExplanation('kruskal',[{src:srcId,tgt:null,result:r,path:null}]);
-    autoSwitchExplain();
-
-  } else {
-    let totalDist=0,allVis=[],allPE=[],cur=srcId,ok=true;
-    const routeNames=[PLACES[srcId].name],segs=[],routeIds=[srcId];
-
-    for(let i=0;i<stops.length;i++){
-      const tgt=stops[i];
-      hlPseudo(algo,algo==='dijkstra'?['d3','d4','d5','d6']:['b2','b3','b4']);
-      await sleep(animSpd);
-
-      const res=algo==='dijkstra'?dijkstraRun(cur,tgt):bfsRun(cur,tgt);
-
-      for(const v of res.visited){
-        if(!allVis.includes(v))allVis.push(v);
-        if(animSpd>0){
-          const p=PLACES[v];
-          const c=L.circleMarker([p.lat,p.lng],{radius:16,fillColor:'#2563eb',fillOpacity:.1,color:'#2563eb',weight:1,opacity:.35}).addTo(map);
-          visitedMarkers.push(c);
-          hlPseudo(algo,algo==='dijkstra'?['d7','d8']:['b6','b7']);
-          await sleep(animSpd);
-        }
-      }
-      if(!animSpd){
-        allVis.forEach(id=>{const p=PLACES[id];const c=L.circleMarker([p.lat,p.lng],{radius:16,fillColor:'#2563eb',fillOpacity:.1,color:'#2563eb',weight:1,opacity:.35}).addTo(map);visitedMarkers.push(c);});
-      }
-
-      if(!isFinite(res.dist)){log('Tidak ada jalur ke '+PLACES[tgt].name,'lr');ok=false;break;}
-      const path=recon(res.prev,cur,tgt);
-      if(!path){ok=false;break;}
-
-      hlPseudo(algo,algo==='dijkstra'?['d11','d12','d13']:['b11','b12']);
-      for(let j=0;j<path.length-1;j++){
-        const geom=await getRouteGeom(path[j],path[j+1]);
-        const l=L.polyline(geom,{color:'#fbbf24',weight:6,opacity:.95}).addTo(map);
-        pathLines.push(l);
-        allPE.push([path[j],path[j+1]]);
-        if(animSpd>0)await sleep(animSpd);
-      }
-
-      hlPseudo(algo,algo==='dijkstra'?['d15']:['b14']);
-      await sleep(animSpd>0?animSpd:0);
-
-      segs.push({src:cur,tgt,result:res,path});
-      totalDist+=res.dist;routeNames.push(PLACES[tgt].name);routeIds.push(tgt);cur=tgt;
-      document.getElementById('prog').style.width=((i+1)/stops.length*100)+'%';
-    }
-
-    drawAllMarkers();
-    const el=(performance.now()-t0).toFixed(3);
-
-    if(ok){
-      lastRoute=routeIds;
-      setStats(totalDist.toFixed(1)+' km', stops.length, allVis.length, el+' ms',
-        routeNames.map(n=>n.split(' ').slice(0,2).join(' ')).join(' → '));
-      renderPathSteps(allPE);
-      document.getElementById('gmapsBtn').disabled=false;
-
-      if(allPE.length){
-        const lats=allPE.flatMap(s=>[PLACES[s[0]].lat,PLACES[s[1]].lat]);
-        const lngs=allPE.flatMap(s=>[PLACES[s[0]].lng,PLACES[s[1]].lng]);
-        map.fitBounds([[Math.min(...lats)-.008,Math.min(...lngs)-.008],[Math.max(...lats)+.008,Math.max(...lngs)+.008]]);
-      }
-      log('Selesai! '+totalDist.toFixed(1)+' km | Visited:'+allVis.length+' | '+el+' ms','lg');
-      document.getElementById('explainContent').innerHTML=buildExplanation(algo,segs);
-      autoSwitchExplain();
-    }
-  }
-
-  running=false;
-  document.getElementById('btnSolve').disabled=false;
-}
-
-function autoSwitchExplain(){
-  document.querySelectorAll('.rp-tab').forEach((t,i)=>t.classList.toggle('on',i===1));
-  document.querySelectorAll('.rp-pane').forEach((p,i)=>p.classList.toggle('on',i===1));
-}
-
-function setStats(d,s,v,t,r){
-  document.getElementById('sDist').textContent=d;
-  document.getElementById('sStops').textContent=s;
-  document.getElementById('sVis').textContent=v;
-  document.getElementById('sTime').textContent=t;
-  document.getElementById('sRoute').textContent=r;
-}
-
-function renderPathSteps(edges){
-  const el=document.getElementById('routeSteps');
-  if(!edges.length){el.innerHTML='<div style="font-size:.74rem;color:var(--text3);">Tidak ada langkah.</div>';return;}
-  const nodes=[edges[0][0],...edges.map(e=>e[1])];
-  el.innerHTML=nodes.map((id,i)=>{
-    const e=edges[i];
-    const w=e?EDGES.find(x=>(x[0]===e[0]&&x[1]===e[1])||(x[0]===e[1]&&x[1]===e[0]))?.[2]||'?':'';
-    return`<div class="r-step">
-      <div class="r-dot ${i===0?'start':i===nodes.length-1?'end':''}"></div>
-      <div style="flex:1">
-        <div class="r-node">${PLACES[id].ico} ${PLACES[id].name}</div>
-        ${e?`<div class="r-dist">↓ ${w} km → ${PLACES[e[1]].name.split(' ').slice(0,2).join(' ')}</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function clearRoute(redraw=true){
-  visitedMarkers.forEach(m=>map.removeLayer(m)); visitedMarkers=[];
-  pathLines.forEach(l=>map.removeLayer(l)); pathLines=[];
-  mstLines.forEach(l=>map.removeLayer(l)); mstLines=[];
-  document.getElementById('prog').style.width='0%';
-  setStats('—','—','—','—','—');
-  document.getElementById('routeSteps').innerHTML='<div style="font-size:.74rem;color:var(--text3);">Klik "Cari Rute Optimal".</div>';
-  document.getElementById('kruskalPanel').style.display='none';
-  document.getElementById('pathStepsWrap').style.display='block';
-  document.getElementById('gmapsBtn').disabled=true;
-  lastRoute=null;
-  if(redraw)drawAllMarkers();
-}
-
-function resetAll(){
-  stops=[];srcId=0;
-  document.getElementById('selSrc').value=0;
-  renderStops();clearRoute();log('Reset semua.','lb');
-}
-
-function setAlgo(a,el){
-  algo=a;
-  document.querySelectorAll('.apill').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
-  ['dijkstra','bfs','kruskal'].forEach(k=>document.getElementById('ami-'+k).classList.toggle('show',k===a));
-  renderPseudo(a);clearRoute();log('Algoritma: '+a.toUpperCase(),'lb');
-}
-function setSpd(ms,el){animSpd=ms;document.querySelectorAll('.spd').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
-function toggleSec(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open');}
-function switchTab(name,btn){
-  document.querySelectorAll('.rp-tab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.rp-pane').forEach(p=>p.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('pane-'+name).classList.add('on');
-}
-function log(msg,cls=''){
-  const box=document.getElementById('logBox'),d=document.createElement('div');
-  d.textContent='> '+msg;if(cls)d.className=cls;
-  box.appendChild(d);box.scrollTop=box.scrollHeight;
-}
-function sleep(ms){return new Promise(r=>ms>0?setTimeout(r,ms):r());}
-</script>
+<script src="script.js"></script>
 </body>
 </html>
