@@ -324,6 +324,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
   <span class="t-sub">EF234405 DAA · Quiz 2 · 2026</span>
   <div class="t-right">
     <span class="t-badge">Dijkstra · BFS · Kruskal MST</span>
+    <span id="osrmStatus" style="font-size:.68rem;color:#d97706;font-weight:500;display:none;">⟳ Memuat peta jalan...</span>
     <button class="gmaps-main" id="gmapsBtn" onclick="openInGMaps()" disabled>
       🗺 Buka di Google Maps
     </button>
@@ -541,8 +542,10 @@ const CAT_COLORS = {hotel:'#2563eb',sejarah:'#dc2626',museum:'#7c3aed',alam:'#05
 
 // ── STATE ──
 let srcId=0, stops=[], algo='dijkstra', animSpd=40, running=false;
-let visitedMarkers=[], pathLines=[], mstLines=[], allMarkers=[];
+let visitedMarkers=[], pathLines=[], mstLines=[], allMarkers=[], baseEdgeLines=[];
 let activeCategory='all', lastRoute=null;
+// Cache OSRM geometries: key = "a-b" → LatLng[]
+const routeCache = {};
 
 // ── MAP ──
 const map = L.map('map',{zoomControl:true}).setView([-7.265,112.745],13);
@@ -550,18 +553,62 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
   attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19
 }).addTo(map);
 
-// Draw base edges
-const baseEdgeLines = [];
-EDGES.forEach(([a,b,w])=>{
+// ── OSRM HELPERS ──
+async function fetchOSRM(latA,lngA,latB,lngB){
+  const url=`https://router.project-osrm.org/route/v1/driving/${lngA},${latA};${lngB},${latB}?overview=full&geometries=geojson`;
+  try{
+    const r=await fetch(url);
+    const d=await r.json();
+    if(d.routes&&d.routes[0]){
+      return d.routes[0].geometry.coordinates.map(([lng,lat])=>([lat,lng]));
+    }
+  }catch(e){}
+  // Fallback: straight line
+  return [[latA,lngA],[latB,lngB]];
+}
+
+async function getRouteGeom(a,b){
+  const key=`${Math.min(a,b)}-${Math.max(a,b)}`;
+  if(routeCache[key])return routeCache[key];
   const pa=PLACES[a],pb=PLACES[b];
-  const l=L.polyline([[pa.lat,pa.lng],[pb.lat,pb.lng]],{color:'#cbd5e1',weight:2,opacity:.7}).addTo(map);
-  baseEdgeLines.push(l);
-  const ml=(pa.lat+pb.lat)/2,mg=(pa.lng+pb.lng)/2;
-  L.marker([ml,mg],{
-    icon:L.divIcon({html:`<div style="font-size:8.5px;color:#94a3b8;background:rgba(255,255,255,.92);padding:1px 4px;border-radius:3px;border:1px solid #e2e8f0;white-space:nowrap;">${w}km</div>`,className:'',iconAnchor:[14,7]}),
-    interactive:false
-  }).addTo(map);
-});
+  const geom=await fetchOSRM(pa.lat,pa.lng,pb.lat,pb.lng);
+  routeCache[key]=geom;
+  return geom;
+}
+
+// Draw base edges with OSRM routing (async, batched)
+async function drawBaseEdges(){
+  document.getElementById('osrmStatus').style.display='inline';
+  // Draw straight lines immediately as placeholder
+  baseEdgeLines.forEach(l=>map.removeLayer(l)); baseEdgeLines=[];
+  EDGES.forEach(([a,b,w])=>{
+    const pa=PLACES[a],pb=PLACES[b];
+    const l=L.polyline([[pa.lat,pa.lng],[pb.lat,pb.lng]],{color:'#cbd5e1',weight:2,opacity:.5}).addTo(map);
+    baseEdgeLines.push(l);
+    // Weight label at midpoint
+    const ml=(pa.lat+pb.lat)/2,mg=(pa.lng+pb.lng)/2;
+    L.marker([ml,mg],{
+      icon:L.divIcon({html:`<div style="font-size:8.5px;color:#94a3b8;background:rgba(255,255,255,.92);padding:1px 4px;border-radius:3px;border:1px solid #e2e8f0;white-space:nowrap;">${w}km</div>`,className:'',iconAnchor:[14,7]}),
+      interactive:false
+    }).addTo(map);
+  });
+  // Then upgrade each to OSRM geometry in background (batch with delay to avoid rate limit)
+  for(let i=0;i<EDGES.length;i++){
+    const [a,b]=EDGES[i];
+    const geom=await getRouteGeom(a,b);
+    // Replace placeholder line
+    if(baseEdgeLines[i]){
+      map.removeLayer(baseEdgeLines[i]);
+      baseEdgeLines[i]=L.polyline(geom,{color:'#cbd5e1',weight:2,opacity:.6}).addTo(map);
+    }
+    document.getElementById('osrmStatus').textContent=`⟳ Memuat jalan ${i+1}/${EDGES.length}...`;
+    // Small delay to be polite to OSRM public server
+    await sleep(60);
+  }
+  document.getElementById('osrmStatus').style.display='none';
+  log('Peta jalan dimuat via OSRM ✓','lg');
+}
+drawBaseEdges();
 
 function makeIcon(p){
   const isSrc=p.id===srcId, isStop=stops.includes(p.id);
@@ -894,10 +941,10 @@ async function solve(){
     }
 
     hlPseudo('kruskal',['k8','k9','k10']);
-    // Animate MST edges one by one
+    // Animate MST edges one by one with OSRM routing
     for(const[a,b] of r.mst){
-      const pa=PLACES[a],pb=PLACES[b];
-      const l=L.polyline([[pa.lat,pa.lng],[pb.lat,pb.lng]],{color:'#059669',weight:5,opacity:.9}).addTo(map);
+      const geom=await getRouteGeom(a,b);
+      const l=L.polyline(geom,{color:'#059669',weight:5,opacity:.9}).addTo(map);
       mstLines.push(l);
       if(animSpd>0)await sleep(animSpd*1.5);
     }
@@ -951,8 +998,8 @@ async function solve(){
 
       hlPseudo(algo,algo==='dijkstra'?['d11','d12','d13']:['b11','b12']);
       for(let j=0;j<path.length-1;j++){
-        const pa=PLACES[path[j]],pb=PLACES[path[j+1]];
-        const l=L.polyline([[pa.lat,pa.lng],[pb.lat,pb.lng]],{color:'#fbbf24',weight:6,opacity:.95}).addTo(map);
+        const geom=await getRouteGeom(path[j],path[j+1]);
+        const l=L.polyline(geom,{color:'#fbbf24',weight:6,opacity:.95}).addTo(map);
         pathLines.push(l);
         allPE.push([path[j],path[j+1]]);
         if(animSpd>0)await sleep(animSpd);
